@@ -49,7 +49,8 @@ export default {
     drawer: null,
     links: [
       {title: 'Панель', url: '/home', exact: true, icon: 'mdi-view-dashboard'},
-      {title: 'Специалисты', url: '/specialists', icon: 'mdi-truck-fast'},
+      // {title: 'Новые пользователи', url: '/new-users', icon: 'mdi-account-multiple-plus'},
+      {title: 'Специалисты', url: '/specialists', icon: 'mdi-account-hard-hat'},
       {title: 'Пользователи', url: '/users', icon: 'mdi-account-multiple'},
     ],
   }),

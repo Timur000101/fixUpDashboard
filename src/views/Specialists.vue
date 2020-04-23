@@ -8,7 +8,7 @@
       :headers="headers"
       :items="courierData"
       :search="search"
-      sort-by="calories"
+      sort-by="nickname"
       class="elevation-1"
     >
       <template v-slot:top>
@@ -39,33 +39,39 @@
                 <v-container>
                   <v-row>
                     <div style="display: flex; justify-content: space-between;">
-                      <img 
-                        :src="editedItem.avatar"
-                        width="200"
-                        class="previewer-demo-img"
-                        style="margin-right: 30px;"
-                        id="img" 
-                        @click="show()"
-                      />
-                      <img 
-                        :src="editedItem.front_passport"
-                        width="200"
-                        class="previewer-demo-img"
-                        style="margin-right: 30px;" 
-                        id="img2" 
-                        @click="show2()"
-                      />
-                      <img 
-                        :src="editedItem.back_passport"
-                        width="200"
-                        class="previewer-demo-img"
-                        id="img3" 
-                        @click="show3()"
-                      />
+                      <div class="imageBlock">
+                        <img 
+                          :src="editedItem.avatar"
+                          width="200"
+                          class="previewer-demo-img"
+                          style="margin-right: 30px;"
+                          id="img" 
+                          @click="show()"
+                        />
+                      </div>
+                      <div class="imageBlock">
+                        <img 
+                          :src="editedItem.front_passport"
+                          width="200"
+                          class="previewer-demo-img"
+                          style="margin-right: 30px;" 
+                          id="img2" 
+                          @click="show2()"
+                        />
+                      </div>
+                      <div class="imageBlock">
+                        <img 
+                          :src="editedItem.back_passport"
+                          width="200"
+                          class="previewer-demo-img"
+                          id="img3" 
+                          @click="show3()"
+                        />
+                      </div>
                       <!-- <previewer ref="previewer" :list="list" :options="options"> </previewer> -->
                     </div>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.nickname" label="nickname"></v-text-field>
+                      <v-text-field  v-model="editedItem.nickname" label="nickname"></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                       <v-text-field v-model="editedItem.speciality" label="speciality"></v-text-field>
@@ -74,10 +80,7 @@
                       <v-text-field v-model="editedItem.phone" label="Phone"></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.country" label="Country"></v-text-field>
-                    </v-col>
-                    <v-col cols="12" sm="6" md="4">
-                      <v-text-field v-model="editedItem.city.name" label="City"></v-text-field>
+                      <v-text-field v-model="editedItem.country.name" label="Country"></v-text-field>
                     </v-col>
                     <v-col cols="12" sm="6" md="4">
                       <v-menu
@@ -85,10 +88,8 @@
                         v-model="menu1"
                         :close-on-content-click="false"
                         :nudge-right="40"
-                        lazy
                         transition="scale-transition"
                         offset-y
-                        full-width
                         max-width="290px"
                         min-width="290px"
                       >
@@ -108,6 +109,20 @@
                     </v-col>
                     <v-col cols="12" sm="8" md="6">
                       <v-textarea v-model="editedItem.about" label="About Me"></v-textarea>
+                    </v-col>
+                    <v-col cols="12" sm="6" md="3">
+                      <div v-if="editedItem.is_checked == false">
+                        <v-text-field v-model="checked.is_notChecked"></v-text-field>
+                      </div>
+                      <div v-else>
+                        <v-text-field v-model="checked.is_checked"></v-text-field>
+                      </div>
+                      <v-checkbox
+                        v-model="editedItem.is_checked"
+                        :color="color"
+                        @change="toggleChange(editedItem.id)"
+                        label="Change status"
+                      ></v-checkbox>
                     </v-col>
                   </v-row>
                 </v-container>
@@ -130,16 +145,13 @@
         >
           mdi-account-edit
         </v-icon>
-        <v-icon
+        <!-- <v-icon
           small
           class="display-1"
           @click="deleteItem(item)"
         >
           mdi-delete
-        </v-icon>
-      </template>
-      <template v-slot:no-data>
-        <v-btn color="primary" @click="initialize">Reset</v-btn>
+        </v-icon> -->
       </template>
     </v-data-table>
   </div>
@@ -147,13 +159,10 @@
 
 
 <script>
-import vuePicturePreview from 'vue-picture-preview';
 import { get } from 'http';
 export default {
-  components: {
-    Previewer: vuePicturePreview
-  },
   data: () => ({
+    color: 'accent',
     dialog: false,
     search: '',
     count: 0,
@@ -171,96 +180,57 @@ export default {
         href: 'breadcrumbs_link_1',
       },
     ],
-    // list: [
-    //   {
-    //       msrc:
-    //         'https://tva1.sinaimg.cn/thumbnail/006y8mN6ly1g95rjyub5bj30go0b40wc.jpg',
-    //       src:
-    //         'https://tva1.sinaimg.cn/large/006y8mN6ly1g95rjyub5bj30go0b40wc.jpg',
-    //       w: 600,
-    //       h: 400
-    //     },
-    //     {
-    //       msrc:
-    //         'https://tva1.sinaimg.cn/thumbnail/006y8mN6ly1g95rmt8pq4j30go0b4n28.jpg',
-    //       src:
-    //         'https://tva1.sinaimg.cn/large/006y8mN6ly1g95rmt8pq4j30go0b4n28.jpg',
-    //       w: 600,
-    //       h: 400
-    //     },
-    //     {
-    //       msrc:
-    //         'https://tva1.sinaimg.cn/thumbnail/006y8mN6ly1g95rn3grt6j30go0b4n0w.jpg',
-    //       src:
-    //         'https://tva1.sinaimg.cn/large/006y8mN6ly1g95rn3grt6j30go0b4n0w.jpg',
-    //       w: 600,
-    //       h: 400
-    //     }
-    // ],
-    // options: {
-    //   getThumbBoundsFn(index) {
-    //     // find thumbnail element
-    //     let thumbnail = document.querySelectorAll('.previewer-demo-img')[
-    //       index
-    //     ];
-    //     // get window scroll Y
-    //     let pageYScroll =
-    //       window.pageYOffset || document.documentElement.scrollTop;
-    //     // optionally get horizontal scroll
-    //     // get position of element relative to viewport
-    //     let rect = thumbnail.getBoundingClientRect();
-    //     // w = width
-    //     return { x: rect.left, y: rect.top + pageYScroll, w: rect.width };
-    //     // Good guide on how to get element coordinates:
-    //     // http://javascript.info/tutorial/coordinates
-    //   }
-    // },
     menu1: false,
     menu2: false,
     headers: [
       {
         text: 'nickname',
         align: 'left',
-        sortable: false,
+        sortable: true,
         value: 'nickname',
       },
       { text: 'Phone', value: 'phone' },
-      { text: 'City', value: 'city.name' },
-      { text: 'Rating', value: 'rating' },
+      { text: 'Status', value: 'is_checked' },
       { text: 'Actions', value: 'action', sortable: false },
     ],
     courierData: [],
     editedIndex: -1,
     editedItem: {
+      id: '',
       nickname: '',
       country: '',
       region: '',
-      city: {
-        name: ''
-      },
+      // city: {
+      //   name: ''
+      // },
       phone: '',
       speciality: '',
       avatar: ' ',
       front_passport: '',
       back_passport: '',
       birth_date: '',
-      rating: '',
+      is_checked: false,
       about: '',
+    },
+    checked: {
+      isChecked: false,
+      is_checked: 'Checked',
+      is_notChecked: 'Not checked'
     },
     defaultItem: {
       nickname: '',
       country: '',
       region: '',
-      city: {
-        name: ''
-      },
+      // city: {
+      //   name: ''
+      // },
       phone: '',
       speciality: '',
       avatar: '',
       front_passport: '',
       back_passport: '',
       birth_date: '',
-      rating: '',
+      is_checked: false,
       about: '',
     },
     date: new Date().toISOString().substr(0, 10),
@@ -285,13 +255,11 @@ export default {
     }
   },
 
-  created () {
-    this.initialize()
-  },
-
   mounted () {
     axios.get('https://back.ontimeapp.club/users/all/ ', {headers: {'Authorization': "Token " + localStorage.getItem("token"), "Access-Control-Allow-Headers":"*"}})
     .then(r => {
+      console.log(r.data.data[5]);
+      
       let arr = []
       for (let i = 0; i < r.data.data.length; i++) {
         if (r.data.data[i].is_worker === true){
@@ -299,6 +267,12 @@ export default {
           r.data.data[i].front_passport = 'https://back.ontimeapp.club' + r.data.data[i].front_passport
           r.data.data[i].back_passport = 'https://back.ontimeapp.club' + r.data.data[i].back_passport
           arr.push(r.data.data[i])
+          
+        }
+
+        if(r.data.data[i].is_checked == true) {
+          console.log(r.data.data[i]);
+          
         }
       }
       this.courierData = arr
@@ -306,6 +280,21 @@ export default {
   },
 
   methods: {
+    toggleChange(id) {
+        let data = {
+          'id': id,
+          'checked': ''
+        }
+        if (this.editedItem.is_checked == true) {
+          data.checked = 'True'
+        } else {
+          data.checked = 'False'
+        }
+        axios.post('https://back.ontimeapp.club/users/checked/', data, {headers: {'Authorization': "Token " + localStorage.getItem("token"), "Access-Control-Allow-Headers":"*"}})
+        .then(r => {
+          console.log(r.data);
+        })
+    },
     formatDate (date) {
       if (!date) return null
       const [year, month, day] = date.split('-')
@@ -315,29 +304,6 @@ export default {
       if (!date) return null
       const [month, day, year] = date.split('/')
       return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
-    },
-    initialize () {
-      this.courierData = [
-        {
-          nickname: '',
-          country: '',
-          region: '',
-          city: {
-            name: ''
-          },
-          phone: '',
-          speciality: '',
-          gender: '',
-          avatar: '',
-          certificate_front: '',
-          certificate_back: '',
-          gender: '',
-          birth_date: '',
-          rating: '',
-          about: '',
-        },
-        
-      ]
     },
     show() {
       if (this.count % 2 == 0) {
@@ -407,11 +373,6 @@ export default {
       this.dialog = true
     },
 
-    deleteItem (item) {
-      const index = this.desserts.indexOf(item)
-      confirm('Are you sure you want to delete this item?') && this.courierData.splice(index, 1)
-    },
-
     close () {
       this.dialog = false
       setTimeout(() => {
@@ -420,30 +381,17 @@ export default {
       }, 300)
     },
 
-    save () {
-      let data = {
-        'nickname': this.editedItem.nickname,
-        'city': this.editedItem.address,
-        'phone': this.editedItem.phone,
-        
-      }
-
-      if (this.editedIndex > -1) {
-        Object.assign(this.usersData[this.editedIndex], this.editedItem)
-      } else {
-        axios.post('https://delprod.herokuapp.com/users/all/', data, {headers: {'Authorization': "Token " + localStorage.getItem("token"), }}   )
-        .then((response) => {
-          console.log(response)
-        }, r=> {
-          console.log(r)
-        })
-        .catch((r) => {
-          console.log(r)
-        })// console.log(this.editItem.name)
-            // this.usersData.push(this.editedItem)
-      }
-      this.close()
-    },
   },
 }
 </script>
+
+<style scoped>
+  .imageBlock {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 220px;
+    height: 130px;
+    margin: 20px 5px;
+  }
+</style>

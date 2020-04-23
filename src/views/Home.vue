@@ -36,7 +36,6 @@
     <v-divider class="mt-10"></v-divider>
 
     <!-- Request schedule block -->
-
     <v-row class="mt-5">
       <v-col cols="12">
         <v-card>
@@ -59,7 +58,6 @@
                   xtitle="Месяц" 
                   ytitle="Количество" 
                   :legend="true" 
-                  :refresh="60"
                   />
               </div>
             </div>
@@ -69,7 +67,7 @@
     </v-row>
     <!-- End request schedule block -->
 
-    <!-- Start Last request block -->
+    <!-- Start orders block -->
     <v-data-table
       :headers="headers"
       :items="requests"
@@ -125,7 +123,6 @@
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-                <v-btn color="blue darken-1" text @click="save">Save</v-btn>
               </v-card-actions>
             </v-card>
           </v-dialog>
@@ -139,12 +136,8 @@
            mdi-account-edit
         </v-icon>
       </template>
-      <template v-slot:no-data>
-        <v-btn color="primary" @click="initialize">Reset</v-btn>
-      </template>
     </v-data-table>
-    <!-- End Last request block -->
-    
+    <!-- End orders block -->
   </div>
 </template>
 
@@ -154,138 +147,153 @@ import Users from '@/views/Users.vue'
 import moment from 'moment'
 export default {
   components: {
-      Chart
+    Chart
+  },
+  data: () => ({
+    newUsers: '',
+    number: null,
+    number2: null,
+    def : {
+        type : 'bar'
     },
-    data: () => ({
-      newUsers: '',
-      number: null,
-      number2: null,
-      def : {
-          type : 'bar'
-      },
-      return: {
-        info: null
-      },
-      lineChartData: [
-        {name: 'Заказы', data: {'2017-05-13': 2, '2017-06-13': 5, '2017-07-13': 8, '2017-08-13': 10, '2017-09-13': 5 }},
-        {name: 'Новые пользователи', data: {'2017-05-13': 1, '2017-06-13': 1, '2017-07-13': 6, '2017-08-13': 5, '2017-09-13': 4 }}
-      ],
-      pieChart: [
-        ['Специалисты', null], 
-        ['Пользователи', null]
-      ],
-      items: [
-        {
-          text: 'Dashboard',
-          disabled: true,
-          href: '/home',
-        },
-      ],
-      cardData: [
-        {color: 'green lighten-1', icon: 'mdi-account-multiple-plus', title: 'Новые пользователи', statistics: '15% со вчерашнего дня', footerColor: 'green darken-1', count: ''},
-        {color: 'deep-purple lighten-1', icon: 'mdi-account-tie', title: 'Новые специалисты', statistics: '20% со вчерашнего дня', footerColor: 'deep-purple darken-1', count: ''},
-        {color: 'blue-grey lighten-1', icon: 'mdi-trending-up', title: 'Количесто заказов', statistics: '50% со вчерашнего дня', footerColor: 'blue-grey darken-1', count: ''},
-        {color: 'purple lighten-1', icon: 'mdi-currency-usd', title: 'Общий доход', statistics: '15% со вчерашнего дня', footerColor: 'purple darken-1', count: '$1000'}
-      ],
-      /// Status users ///
-      dialog: false,
-      headers: [
-        {
-          text: 'Имя заказчика',
-          align: 'left',
-          sortable: false,
-          value: 'sender.nickname',
-        },
-        { text: 'Имя специалиста', value: 'worker.nickname' },
-        { text: 'Время начала', value: 'date' },
-        { text: 'Время завершение', value: 'end_date' },
-        { text: 'Цена', value: 'price' },
-        { text: 'Статус', value: 'status' },
-        { text: 'Действия', value: 'action', sortable: false },
-      ],
-      requests: [],
-      editedIndex: -1,
-      editedItem: {
-        sender: {
-          nickname: ''
-        },
-        date: 0,
-        end_date: 0,
-        a_name: '',
-        b_name: '',
-        price: 0,
-        status: 0,
-      },
-      defaultItem: {
-        sender: {
-          nickname: ''
-        },
-        date: 0,
-        end_date: 0,
-        a_name: '',
-        b_name: '',
-        price: 0,
-        status: 0,
-      },
-    }),
-    watch: {
-      dialog (val) {
-        val || this.close()
-      },
+    return: {
+      info: null
     },
-    created () {
-      this.initialize()
+    // Charts ?? Chart.js
+    lineChartData: [
+      {name: 'Заказы', data: {'2017-05-13': 2, '2017-06-13': 5, '2017-07-13': 8, '2017-08-13': 10, '2017-09-13': 5 }},
+      {name: 'Новые пользователи', data: {'2017-05-13': 1, '2017-06-13': 1, '2017-07-13': 6, '2017-08-13': 5, '2017-09-13': 4 }}
+    ],
+    pieChart: [
+      ['Специалисты', null], 
+      ['Пользователи', null]
+    ],
+    //  Header page url
+    items: [
+      {
+        text: 'Dashboard',
+        disabled: true,
+        href: '/home',
+      },
+    ],
+    // Header statistics cards
+    cardData: [
+      {color: 'green lighten-1', icon: 'mdi-account-multiple-plus', title: 'Новые пользователи', statistics: '15% со вчерашнего дня', footerColor: 'green darken-1', count: ''},
+      {color: 'deep-purple lighten-1', icon: 'mdi-account-tie', title: 'Новые специалисты', statistics: '20% со вчерашнего дня', footerColor: 'deep-purple darken-1', count: ''},
+      {color: 'blue-grey lighten-1', icon: 'mdi-trending-up', title: 'Количесто заказов', statistics: '50% со вчерашнего дня', footerColor: 'blue-grey darken-1', count: ''},
+      {color: 'purple lighten-1', icon: 'mdi-currency-usd', title: 'Общий доход', statistics: '15% со вчерашнего дня', footerColor: 'purple darken-1', count: '$1000'}
+    ],
+    /// Users order ///
+    dialog: false,
+    headers: [
+      {
+        text: 'Имя заказчика',
+        align: 'left',
+        sortable: false,
+        value: 'sender.nickname',
+      },
+      { text: 'Имя специалиста', value: 'worker.nickname' },
+      { text: 'Время начала', value: 'date' },
+      { text: 'Время завершение', value: 'end_date' },
+      { text: 'Цена', value: 'price' },
+      { text: 'Статус', value: 'status' },
+      { text: 'Действия', value: 'action', sortable: false },
+    ],
+    requests: [],
+    editedIndex: -1,
+    editedItem: {
+      sender: {
+        nickname: ''
+      },
+      date: 0,
+      end_date: 0,
+      a_name: '',
+      b_name: '',
+      price: 0,
+      status: 0,
     },
-    mounted () {      
-      axios.get('https://back.ontimeapp.club/users/all/', {headers: {'Authorization': "Token " + localStorage.getItem("token")}})
-      .then(r => {
-        // console.log(r)
-        let arr = []
-        for (let i = 0; i < r.data.data.length; i++) {
-          if (r.data.data[i].is_worker === true){
-            arr.push(r.data.data[i])
-          }
-          this.cardData[0].count = r.data.data.length
-          this.number2 = r.data.data.length
+    defaultItem: {
+      sender: {
+        nickname: ''
+      },
+      date: 0,
+      end_date: 0,
+      a_name: '',
+      b_name: '',
+      price: 0,
+      status: 0,
+    },
+  }),
+  watch: {
+    dialog (val) {
+      val || this.close()
+    },
+  },
+  mounted () {      
+    axios.get('https://back.ontimeapp.club/users/all/', {headers: {'Authorization': "Token " + localStorage.getItem("token")}})
+    .then(r => {
+      let arr = []
+      for (let i = 0; i < r.data.data.length; i++) {
+        if (r.data.data[i].is_worker === true){
+          arr.push(r.data.data[i])
         }
-        this.cardData[1].count = arr.length
-        this.number = arr.length
-      });
-      axios.get('https://back.ontimeapp.club/users/order/all/', {headers: {'Authorization': "Token " + localStorage.getItem("token")}})
-      .then(r => {
-        for (let i in r.data.data){
-          let d = moment(String(r.data.data[i].date)).format('MM.DD.YY HH:MM')
-          let ed = moment(String(r.data.data[i].end_date)).format('MM.DD.YY HH:MM')
-          r.data.data[i].date = d
-          r.data.data[i].end_date = ed
-          if (r.data.data[i].is_active){
-            r.data.data[i].status = 'active'
-          }
-          else{
-            r.data.data[i].status = 'finished'
-          }
+        this.cardData[0].count = r.data.data.length
+        this.number2 = r.data.data.length
+      }
+      this.cardData[1].count = arr.length
+      this.number = arr.length
+    });
+    axios.get('https://back.ontimeapp.club/users/order/all/', {headers: {'Authorization': "Token " + localStorage.getItem("token")}})
+    .then(r => {
+      for (let i in r.data.data){
+        let d = moment(String(r.data.data[i].date)).format('MM.DD.YY HH:MM')
+        let ed = moment(String(r.data.data[i].end_date)).format('MM.DD.YY HH:MM')
+        r.data.data[i].date = d
+        r.data.data[i].end_date = ed
+        if (r.data.data[i].is_active){
+          r.data.data[i].status = 'active'
         }
-        this.requests = r.data.data
-        
-        
-        this.cardData[2].count = r.data.data.length
-        
-      })
-    
+        else{
+          r.data.data[i].status = 'finished'
+        }
+      }
+      this.requests = r.data.data
+      this.cardData[2].count = r.data.data.length
+    })
+
+  },
+  methods: {
+    editItem (item) {
+      this.editedIndex = this.requests.indexOf(item)
+      this.editedItem = Object.assign({}, item)
+      this.dialog = true
+    },
+    close () {
+      this.dialog = false
+      setTimeout(() => {
+        this.editedItem = Object.assign({}, this.defaultItem)
+        this.editedIndex = -1
+      }, 300)
+    },
+  },
+}
+</script>
+
+<style scoped>
+  .charts {
+    display: flex;
+  }
+</style>
 
       // let url = "wss://back.ontimeapp.club/maps/order/?token="+localStorage.getItem('token')
-
       // var socket = new WebSocket(url);
       // socket.onopen = function() {
       //   console.log("Соединение установлено.");
       // };
-
       // socket.onmessage = function(event) {
       //   this.requests.push(event.data)
       //   console.log(event.data)
       // };
-
-      
       // socket.onclose = function(event) {
       //   if (event.wasClean) {
       //     alert('Соединение закрыто чисто');
@@ -294,59 +302,9 @@ export default {
       //   }
       //   alert('Код: ' + event.code + ' причина: ' + event.reason);
       // };
-
       // socket.onerror = function(error) {
       //   alert("Ошибка " + error.message);
       // };
       // Chartkick.options = {
       //   colors: ["#7E57C2", "#66BB6A"]
       // }
-    },
-    methods: {
-      initialize () {
-        this.requests = [
-          {
-            nickname: '',
-            phone: '',
-            // customer_id: '',
-            date: '',
-            endTime: '',
-            price: '',
-            status: '',
-          },
-        ]
-      },
-      
-      editItem (item) {
-        this.editedIndex = this.requests.indexOf(item)
-        this.editedItem = Object.assign({}, item)
-        this.dialog = true
-      },
-
-      close () {
-        this.dialog = false
-        setTimeout(() => {
-          this.editedItem = Object.assign({}, this.defaultItem)
-          this.editedIndex = -1
-        }, 300)
-      },
-
-      save () {
-        if (this.editedIndex > -1) {
-          Object.assign(this.requests[this.editedIndex], this.editedItem)
-        } else {
-          this.requests.push(this.editedItem)
-        }
-        this.close()
-      },
-    },
-}
-</script>
-
-
-<style scoped>
-  .charts {
-    display: flex;
-
-  }
-</style>

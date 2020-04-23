@@ -3,7 +3,6 @@
     <div class="vld-parent">
         <loading :active.sync="isLoading" 
         :can-cancel="true" 
-        :on-cancel="onCancel"
         :is-full-page="fullPage"></loading>
     </div>
     <v-content>
@@ -87,6 +86,9 @@ export default {
   props: {
     source: String,
   },
+  mounted() {
+    localStorage.removeItem('token')
+  },
   methods: {
     login() {
       this.isLoading = true;
@@ -102,6 +104,8 @@ export default {
           localStorage.setItem('token', response.data.key)
           localStorage.setItem('uid', response.data.uid)
           this.$router.push('/home');
+          console.log(response);
+          
         }
       })
       .catch((error) => {

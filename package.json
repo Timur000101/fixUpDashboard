@@ -7,7 +7,6 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
-    "@mrhanson/vue-file-preview": "^1.2.0",
     "axios": "^0.19.0",
     "body-parser": "^1.19.0",
     "chart.js": "^2.9.3",
@@ -24,6 +23,7 @@
     "vue-axios": "^2.1.5",
     "vue-chartkick": "^0.6.0",
     "vue-chartless": "^0.1.23",
+    "vue-img-preview": "^1.1.1",
     "vue-loading-overlay": "^3.2.0",
     "vue-picture-preview": "^2.0.1",
     "vue-router": "^3.1.3",

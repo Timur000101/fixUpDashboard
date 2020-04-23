@@ -3,18 +3,17 @@
     <div>
       <v-breadcrumbs :items="items" divider=">"></v-breadcrumbs>
     </div>
-    <!-- Users data tabel -->
+
     <v-data-table
       :headers="headers"
       :items="usersData"
       :search="search"
-      loading loading-text="Loading... Please wait"
       sort-by="calories"
       class="elevation-1"
     >
       <template v-slot:top>
         <v-toolbar flat color="white">
-          <v-toolbar-title>Управление пользователями</v-toolbar-title>
+          <v-toolbar-title>Новые пользователи</v-toolbar-title>
           <v-divider
             class="mx-4"
             inset
@@ -27,8 +26,11 @@
             hide-details
           ></v-text-field>
           <v-spacer></v-spacer>
-          <!-- Users detail popup window -->
+          <!-- New User block -->
           <v-dialog v-model="dialog" max-width="500px">
+            <!-- <template v-slot:activator="{ on }">
+              <v-btn color="pink accent-3" dark class="mb-2" v-on="on">Новый пользователь</v-btn>
+            </template> -->
             <v-card>
               <v-card-title>
                 <span class="headline">{{ formTitle }}</span>
@@ -56,10 +58,12 @@
               <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
+                <v-btn color="blue darken-1" text @click="save">Save</v-btn>
               </v-card-actions>
             </v-card>
           </v-dialog>
           <!-- End New User block -->
+
         </v-toolbar>
       </template>
       <template v-slot:item.action="{ item }">
@@ -70,10 +74,21 @@
         >
           mdi-account-edit
         </v-icon>
+        <v-icon
+          small
+          class="display-1"
+          @click="deleteItem(item)"
+        >
+          mdi-delete
+        </v-icon>
+      </template>
+      <template v-slot:no-data>
+        <v-btn color="primary" @click="initialize">Reset</v-btn>
       </template>
     </v-data-table>
   </div>
 </template>
+
 
 <script>
 export default {
@@ -81,7 +96,6 @@ export default {
     dialog: false,
     valid: '',
     search: '',
-    // page urls
     items: [
       {
         text: 'Dashboard',
@@ -89,12 +103,11 @@ export default {
         href: '/home',
       },
       {
-        text: 'Users',
+        text: 'New users',
         disabled: true,
         href: 'breadcrumbs_link_1',
       },
     ],
-    // Data table column titles
     headers: [
       {
         text: 'Имя',
@@ -127,7 +140,7 @@ export default {
 
   computed: {
     formTitle () {
-      return this.editedIndex === -1 ? 'New User' : 'User detail info'
+      return this.editedIndex === -1 ? 'New User' : 'Edit User'
     },
   },
 
@@ -143,21 +156,67 @@ export default {
       for (let i = 0; i < r.data.data.length; i++) {
         if (r.data.data[i].is_customer === true){
           r.data.data[i].avatar = 'https://back.ontimeapp.club' + r.data.data[i].avatar
+          console.log(r.data.data[i].city)
         }
       }
       this.usersData = r.data.data
     });
   },
   methods: {
+    initialize () {
+      this.usersData = [
+        {
+          avatar: '',
+          nickname: '',
+          email: '',
+          city: '',
+          phone: '',
+        }
+      ]
+    },
+    getPost() {
+      
+    },
     editItem (item) {
       this.editedIndex = this.usersData.indexOf(item)
       this.editedItem = Object.assign({}, item)
       this.dialog = true
     },
 
+    deleteItem (item) {
+      const index = this.usersData.indexOf(item)
+      confirm('Are you sure you want to delete this item?') && this.usersData.splice(index, 1)
+    },
+
     close () {
       this.dialog = false
     },
+    save () {
+      let data = {
+        'nickname': this.editedItem.nickname,
+        'email': this.editedItem.email,
+        // 'city': this.editedItem.address,
+        'phone': this.editedItem.phone,
+        'password': 'saddasa' 
+      }
+      console.log(data)
+      if (this.editedIndex > -1) {
+        Object.assign(this.usersData[this.editedIndex], this.editedItem)
+      } else {
+        axios.post('https://delprod.herokuapp.com/apiadmin/users/user/', data, {headers: {'Authorization': "Token " + localStorage.getItem("token")}}   )
+        .then((response) => {
+          console.log(response)
+        }, r=> {
+          console.log(r)
+        })
+        .catch((r) => {
+          console.log(r)
+        })// console.log(this.editItem.name)
+            // this.usersData.push(this.editedItem)
+      }
+      this.close()
+    },
+    
   },
 }
 </script>
